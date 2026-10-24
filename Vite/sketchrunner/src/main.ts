@@ -1,27 +1,54 @@
 import './style.css'
 import Phaser from 'phaser'
 
+type Level = {
+  spawn: {
+    x: number
+    y: number
+  }
+  platforms: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }[]
+  goal: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+}
+
 class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Rectangle
   private playerBody!: Phaser.Physics.Arcade.Body
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
   private message!: Phaser.GameObjects.Text
   private won = false
+  private spawn = { x: 80, y: 490 }
+
+  preload() {
+  this.load.json('level', 'level.json')
+}
+  
 
   create() {
+    const level = this.cache.json.get('level') as Level 
+    this.spawn = level.spawn 
     // Create a visible player and give it a moving physics body.
-    this.player = this.add.rectangle(80, 490, 30, 40, 0x60a5fa)
+    this.player = this.add.rectangle(
+            this.spawn.x,
+            this.spawn.y,
+            30,
+            40,
+            0x60a5fa,
+      )
     this.physics.add.existing(this.player)
     this.playerBody = this.player.body as Phaser.Physics.Arcade.Body
 
     // Platforms are fixed objects: gravity does not move them.
-    const layouts = [
-      { x: 0, y: 540, width: 350, height: 60 },
-      { x: 280, y: 450, width: 180, height: 20 },
-      { x: 500, y: 360, width: 180, height: 20 },
-      { x: 720, y: 270, width: 200, height: 20 },
-      { x: 700, y: 540, width: 260, height: 60 },
-    ]
+   const layouts = level.platforms
 
     const platforms = layouts.map((layout) => {
       const platform = this.add.rectangle(
@@ -40,7 +67,14 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, platforms)
 
     // Touching this green rectangle completes the level.
-    const finish = this.add.rectangle(870, 245, 30, 50, 0x4ade80)
+    const finish = this.add.rectangle(
+          level.goal.x,
+          level.goal.y,
+          level.goal.width,
+          level.goal.height,
+          0x4ade80,
+    )
+
     this.physics.add.existing(finish, true)
 
     this.physics.add.overlap(this.player, finish, () => {
@@ -66,7 +100,7 @@ class GameScene extends Phaser.Scene {
 
   private resetPlayer() {
     this.won = false
-    this.playerBody.reset(80, 490)
+    this.playerBody.reset(this.spawn.x, this.spawn.y)
     this.playerBody.setVelocity(0, 0)
     this.playerBody.setAllowGravity(true)
     this.message.setText(
