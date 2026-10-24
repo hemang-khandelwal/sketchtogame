@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local camera tunnel and credentials
+.camera-tools/
+.env
+.env.*
+!.env.example

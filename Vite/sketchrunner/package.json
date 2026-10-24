@@ -6,13 +6,19 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "camera": "npm run build && node scripts/camera.mjs",
+    "camera:local": "npm run build && node scripts/camera.mjs --local",
+    "test": "node --test tests/*.test.mjs"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "typescript": "~6.0.3",
     "vite": "^8.3.4"
   },
   "dependencies": {
-    "phaser": "^4.2.1"
+    "phaser": "^4.2.1",
+    "qrcode": "^1.5.4",
+    "ws": "^8.22.0"
   }
 }
