@@ -215,6 +215,27 @@ if (phoneMode) {
       window.dispatchEvent(new CustomEvent('sketchrunner:frame', { detail: { blob, width: canvas.width, height: canvas.height } }))
     }, 'image/png')
   }
+  // Step 1: clean the captured frame into a black-on-white ink mask (see vision.ts)
+  window.addEventListener('sketchrunner:frame', async (e) => {
+    const { blob } = (e as CustomEvent<{ blob: Blob }>).detail
+    status('Cleaning drawing…')
+    try {
+      const { extractInk, drawMask } = await import('./vision')
+      const ink = await extractInk(blob)
+      let debug = document.getElementById('ink-debug') as HTMLCanvasElement | null
+      if (!debug) {
+        debug = document.createElement('canvas')
+        debug.id = 'ink-debug'
+        debug.style.maxWidth = '100%'
+        el('capture-panel').appendChild(debug)
+      }
+      drawMask(ink, debug)
+      status(`Ink extracted · ${ink.width} × ${ink.height}`, 'ok')
+    } catch (error) {
+      console.error(error)
+      status('Could not clean the drawing. Check the browser console for details.', 'error')
+    }
+  })
   void import('./game').then(({ mountGame }) => mountGame()).catch(() => {
     el('game').textContent = 'The sample game could not start. Check the browser console for details.'
   })
